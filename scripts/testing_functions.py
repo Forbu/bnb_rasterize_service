@@ -8,21 +8,37 @@ import fiona
 import pprint
 
 from osgeo import gdal
-
+from osgeo import gdal
+from osgeo import ogr
+from osgeo import gdalconst
 
 import time
+
+import geopandas as gpd
+
+from shapely.geometry import Point, Polygon, MultiPolygon
+
 
 start_time = time.time()
 
 X, Y = 648731.0, 6858949.0
 
+file_path_gpkg = "/home/data/bnb_export.gpkg/bnb_export.gpkg" 
 
-with fiona.open("/home/data/bnb_export.gpkg/bnb_export.gpkg") as fiona_collection:
+# start timer 
+start_time = time.time()
+
+with fiona.open(file_path_gpkg) as fiona_collection:
     
     vector_data = fiona_collection.filter(bbox=(X, Y, X + 1000, Y + 1000))
     vector_data = list(vector_data)
 
+    print(fiona_collection.crs)
+
+
 vector_data_shape = []
+geometries = []
+heights = []
 
 # we go through the generator and change the geometry type to polygon
 for element in vector_data: 
@@ -34,25 +50,44 @@ for element in vector_data:
 
     vector_data_shape.append((element["geometry"], float(height)))
 
-    print(element["properties"]['igntop202103_bat_hauteur'])
+    # create the multipolygon and append it to the geometries list
+    geometries.append(MultiPolygon([Polygon(element["geometry"]["coordinates"][0][0])]))
+    
+    # append the height to the heights list
+    heights.append(float(height))
 
+# now we use put the shapes in a geopandas dataframe
+gdf = gpd.GeoDataFrame(heights, geometry=geometries, columns=['height'])
 
-pprint.pprint(vector_data_shape[33])
+# limit the geomatries to the ones that are included in the bbox (X, Y, X + 1000, Y + 1000)
+# now we rasterize the dataframe using geocube
+from geocube.api.core import make_geocube
 
-data_raster = rasterio.features.rasterize(vector_data_shape, out_shape=(200, 200), fill=0, dtype='float32', all_touched=True, default_value=1)
+geom = {
+    "type": "Polygon", 
+    "coordinates": [
+        [
+            [X, Y], [X, Y + 1000], [X + 1000, Y + 1000], [X + 1000, Y], [X, Y]
+        ]
+    ],
+    "crs": {"properties": {"name": "EPSG:2154"}}
+}
 
-# plot data_raster and save it with matplotlib
-import matplotlib.pyplot as plt
-plt.imshow(data_raster)
-plt.savefig('/home/data_raster.png')
+print(gdf)
 
+print(type(gdf))
 
-print(data_raster)
+gdf.crs = {'init': 'epsg:2154'}
 
-# print max and min value of data_raster
-print(data_raster.max())
-print(data_raster.min())
+gdf = gdf.to_crs(2154)
+#gdf = gdf.set_crs("EPSG:2154")
 
+cube = make_geocube(vector_data=gdf, measurements=['height'], resolution=(5, -5), geom=geom, fill=0)
 
+# transform the cube to a numpy array
+cube_array = cube.to_array()
+
+print(cube_array)
+
+# print timer end
 print("--- %s seconds ---" % (time.time() - start_time))
-print("end")
