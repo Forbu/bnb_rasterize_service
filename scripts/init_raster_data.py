@@ -7,11 +7,11 @@ from shapely.geometry import MultiPoint
 
 from bnbserver.extracts_functions import get_raster_value
 
-# import logger
-from bnbserver.logger import logger
+# import logger from logging package
+from logging import getLogger
 
 # init logger
-logger = logger()
+logger = getLogger(__name__)
 
 logger.info("Beginning computing all the points to create tiles")
 
