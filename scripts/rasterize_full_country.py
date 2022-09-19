@@ -27,6 +27,8 @@ xmin, ymin, xmax, ymax = data.total_bounds
 
 print(xmin, ymin, xmax, ymax)
 
+
+
 # now for every polygon in the dataframe we wan loop over the 1km2 tiles and create a raster file for each of them
 for index, row in data.iterrows():
 
