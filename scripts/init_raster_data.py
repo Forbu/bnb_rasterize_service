@@ -5,6 +5,8 @@ import geopandas as gpd
 from rasterio.windows import Window
 from shapely.geometry import MultiPoint
 
+import random
+
 from bnbserver.extracts_functions import get_raster_value
 
 # import logger from logging package
@@ -51,6 +53,9 @@ for index, row in data.iterrows():
 # now we flatten the list
 point_list = [item for sublist in point_list for item in sublist]
 
+# little shuffle
+random.shuffle(point_list)
+
 logger.info("Computing all the points to create tiles done")
 
 logger.info("Beginning computing all the points to create tiles")
@@ -62,24 +67,43 @@ width_tot = int((xmax - xmin) / step)
 info_to_extract = "igntop202103_bat_hauteur"
 file_name = '/home/data/france_buildingh.tif'
 
-profile = {'driver': 'GTiff', 'height': height_tot, 'width': width_tot, 'count': 1, 'dtype': rasterio.float16}
+profile = {'driver': 'GTiff', 'height': height_tot, 'width': width_tot, 'count': 1, 'dtype': rasterio.float32, 'crs': 'EPSG:2154', 'transform': rasterio.Affine(step, 0.0, xmin, 0.0, -step, ymax)}
 
-with rasterio.open(file_name, 'w', crs='EPSG:2154', **profile) as dst:
+distance = 500
+
+with rasterio.open(file_name, 'w', **profile) as dst:
 
     # we loop over all the points information and then we use get_raster_value to get the value of the raster at the point
     # we write the value in the raster file using the window
-    for index, row in point_list.iterrows():
+    for index, row in enumerate(point_list):
+
+        print(row)
+        print(info_to_extract)
 
         # get the value of the raster at the point
-        value = get_raster_value(row['geometry'].x, row['geometry'].y, info_to_extract)
+        value = get_raster_value(row.x, row.y, distance, feature=info_to_extract)
+
+        print(value)
+        print(dir(value))
+        print(value.values)
+        print(value.variable)
+        print(value.to_numpy())
 
         # the beginning is at row['geometry'].x - 500 and row['geometry'].y - 500
         # the end is at row['geometry'].x + 500 and row['geometry'].y + 500
         # get the window
-        window = Window.from_slices(((row['geometry'].y - 500)/step, (row['geometry'].y + 500)/step), ((row['geometry'].x - 500)/step, (row['geometry'].x + 500)/step))
+        src_transform = dst.transform
+        
+        window = Window.from_slices(((row.y - 500)/step, (row.y + 500)/step), ((row.x - 500)/step, (row.x + 500)/step))
+        print(window)
+        win_transform = dst.window_transform(window)
+
+        print(win_transform)
 
         # write the value in the raster file
-        dst.write(value, window=window)
+        dst.write(value, window=win_transform, indexes=1)
+
+        break
 
 
 logger.info("Computing all the points to create tiles done")

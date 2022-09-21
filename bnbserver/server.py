@@ -21,7 +21,6 @@ import os
 # init the flask app
 app = flask.Flask(__name__)
 
-DIR_DATA = "/home/data_server/"
 
 # we create a route that will listen for incoming connections 
 @app.route('/api/v1/resources/extracts', methods=['GET'])

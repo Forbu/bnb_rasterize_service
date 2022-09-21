@@ -5,6 +5,11 @@ RUN apt-get update && apt-get install -y \
     python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# COPY whole package and then install it with pip
+WORKDIR /home
+#COPY . .
+#RUN pip3 install .
+
 RUN pip3 install --upgrade pip
 
 # install geocube
@@ -21,3 +26,6 @@ RUN pip3 install numpy matplotlib
 # install geopandas
 RUN pip3 install geopandas
 
+# install pytest
+RUN pip3 install pytest
+RUN pip3 install geoplot

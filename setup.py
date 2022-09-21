@@ -9,7 +9,7 @@ setup(
     name='bnbserver',
     version='0.1.0',
     description='Python package exposing a REST API to access the BNB data',
-    author='Adrien Bufort',
+    author="Adrien Bufort, Laurent Lebocq, Stefan Cathabard",
     packages=find_packages(),
     install_requires=requirements,
     python_requires='>=3.6',
