@@ -16,5 +16,7 @@ def test_get_raster_value():
     raster_value = get_raster_value(X, Y, distance, feature)
 
     print(raster_value)
+    print(raster_value.x)
+    print(raster_value.y)
 
-    assert raster_value == 1
+    assert raster_value.values.shape == (1, 201, 201)

@@ -3,6 +3,7 @@ FROM osgeo/gdal
 RUN apt-get update && apt-get install -y \
     python3-pip \
     python3-dev \
+    libgeos++-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # COPY whole package and then install it with pip

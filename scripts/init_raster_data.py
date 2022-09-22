@@ -7,6 +7,14 @@ from shapely.geometry import MultiPoint
 
 import random
 
+
+import os, sys
+# get parent of __file__
+file_path = "/".join(os.path.realpath(__file__).split("/")[:-1])
+print(file_path)
+sys.path.append(os.path.dirname(file_path))
+
+
 from bnbserver.extracts_functions import get_raster_value
 
 # import logger from logging package
@@ -30,9 +38,6 @@ xmin, ymin, xmax, ymax = data.total_bounds
 #### 1. We get a list of point that are inside the polygon
 point_list = []
 for index, row in data.iterrows():
-
-    print(index)
-    print(row)
 
     # first we the bound of the polygon
     bbox = row['geometry'].bounds 
@@ -83,18 +88,16 @@ with rasterio.open(file_name, 'w', **profile) as dst:
         # get the value of the raster at the point
         value = get_raster_value(row.x, row.y, distance, feature=info_to_extract)
 
+        value  = value.values[0, 1:201, 0:200]
+
         print(value)
-        print(dir(value))
-        print(value.values)
-        print(value.variable)
-        print(value.to_numpy())
 
         # the beginning is at row['geometry'].x - 500 and row['geometry'].y - 500
         # the end is at row['geometry'].x + 500 and row['geometry'].y + 500
         # get the window
         src_transform = dst.transform
         
-        window = Window.from_slices(((row.y - 500)/step, (row.y + 500)/step), ((row.x - 500)/step, (row.x + 500)/step))
+        window = Window.from_slices((int((row.y - 500)/step), int((row.y + 500)/step)), (int((row.x - 500)/step), int((row.x + 500)/step)))
         print(window)
         win_transform = dst.window_transform(window)
 
