@@ -4,6 +4,7 @@ import geopandas as gpd
 
 from rasterio.windows import Window
 from shapely.geometry import MultiPoint
+import json
 
 import random
 
@@ -78,6 +79,13 @@ distance = 500
 
 # we create a Affine transform that map xmin to 0 and ymin to 0 and ymax to height_tot and xmax to width_tot
 transform = rasterio.transform.from_bounds(xmin, ymin, xmax, ymax, width_tot, height_tot) 
+
+# save projection
+projection = {"ymin_global": ymin_global, "xmin_global": xmin_global, "ymax_global": ymax_global, "xmax_global": xmax_global, "step": step}
+
+# save projection as json
+with open('/home/data/france_projection.json', 'w') as outfile:
+    json.dump(projection, outfile)
 
 with rasterio.open(file_name, 'w', **profile) as dst:
 

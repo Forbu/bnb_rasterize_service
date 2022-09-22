@@ -11,6 +11,8 @@ from geocube.api.core import make_geocube
 
 from shapely.geometry import Point, Polygon, MultiPolygon
 
+import rasterio
+
 path_gpck = "/home/data/bnb_export.gpkg/bnb_export.gpkg"
 
 # function that take as input a position X, Y, distance and the feature we want to retrieve and return the raster value at this position 
@@ -83,4 +85,28 @@ def get_raster_value(X, Y, distance, feature_name="igntop202103_bat_hauteur"):
     return cube_array
 
 # second function to read the raster value at a position X, Y TODO when we will finish the extraction of the data in raster form
+def get_raster_value_from_raster(X, Y, distance, feature_name="igntop202103_bat_hauteur"):
+    """
+    parameters:
+        X, Y: position of the point
+        distance: distance to the point
+        feature: feature we want to retrieve
+
+    return:
+        raster_value: raster value at the position X, Y (array)
+    """
+
+    # first we create the bbox supposing X, Y is the center of the bbox
+    bbox = (X - distance, Y - distance, X + distance, Y + distance)
+
+    path_raster = "/home/data/france_buildingh.tif"
+
+    # read raster data using rasterio
+    with rasterio.open(path_raster) as src:
+
+        # creation of the window file
+        window = src.window(*bbox)
+
+        # read the raster data
+        raster_data = src.read(1, window=window)
 
