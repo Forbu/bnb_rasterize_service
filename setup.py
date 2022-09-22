@@ -13,6 +13,11 @@ setup(
     packages=find_packages(),
     install_requires=requirements,
     python_requires='>=3.6',
+    # create command to launch the flask server
+    entry_points={
+        'console_scripts': [
+            'bnbserver = bnbserver.server:main'
+        ]
 )
 
     

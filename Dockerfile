@@ -30,3 +30,9 @@ RUN pip3 install geopandas
 # install pytest
 RUN pip3 install pytest
 RUN pip3 install geoplot
+
+# install flask
+RUN pip3 install flask
+
+# port mapping between 5000 in the container and 5000 on the host for the flask app
+EXPOSE 5000
