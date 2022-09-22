@@ -38,7 +38,7 @@ def api_extract():
     # convert the parameters to float
     X = float(X)
     Y = float(Y)
-    distance = float(distance)
+    distance = int(distance)
 
     # call the function that will extract the data
     raster_value = extracts_functions.get_raster_value(X, Y, distance, feature)
@@ -62,7 +62,7 @@ def api_download():
     # convert the parameters to float
     X = float(X)
     Y = float(Y)
-    distance = float(distance)
+    distance = int(distance)
     
     # call the function that will extract the data
     raster_value = extracts_functions.get_raster_value(X, Y, distance, feature)

@@ -35,3 +35,18 @@ def test_request_example(client):
     print(response.data)
 
     assert response.status_code == 200
+
+def test_request_example_download(client):
+    response = client.get("/api/v1/resources/download?X=648731.0&Y=6858949.0&distance=500&feature=igntop202103_bat_hauteur")
+
+    # we write the file
+    with open("test.npy", "wb") as f:
+        f.write(response.data)
+
+    # now we read the file
+    data = np.load("test.npy")
+
+    print(data)
+
+    assert response.status_code == 200
+    assert response.headers["Content-Disposition"] == "attachment; filename=X_648731.0_Y_6858949.0_distance_500_feature_igntop202103_bat_hauteur.npy"
