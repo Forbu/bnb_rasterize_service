@@ -35,8 +35,6 @@ data = data.to_crs("EPSG:2154")
 # first we get the limits of the france shapefile
 xmin_global, ymin_global, xmax_global, ymax_global = data.total_bounds
 
-print(xmin_global, ymin_global, xmax_global, ymax_global)
-
 #### 1. We get a list of point that are inside the polygon
 point_list = []
 for index, row in data.iterrows():
@@ -87,20 +85,16 @@ with rasterio.open(file_name, 'w', **profile) as dst:
     # we write the value in the raster file using the window
     for index, row in enumerate(point_list):
 
-        print(row)
 
         # get the value of the raster at the point
         value = get_raster_value(row.x, row.y, distance, feature_name=info_to_extract)
 
         value  = value.values[0, 1:201, 0:200]
 
-        print(row.x)
-        print(xmin_global)
 
         slice_y = (int((row.y - distance - ymin_global)/step), int((row.y + distance - ymin_global)/step))
         slice_x = (int((row.x - distance - xmin_global)/step), int((row.x + distance - xmin_global)/step))
 
-        print(slice_y, slice_x)
 
         # we transform the two slice
         window = Window.from_slices(slice_y, slice_x)
