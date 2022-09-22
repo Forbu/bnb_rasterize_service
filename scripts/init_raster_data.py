@@ -33,7 +33,9 @@ data = data.to_crs("EPSG:2154")
 
 # we create a raster file for each 1km2 tile for the whole france (EPSG:2154)
 # first we get the limits of the france shapefile
-xmin, ymin, xmax, ymax = data.total_bounds
+xmin_global, ymin_global, xmax_global, ymax_global = data.total_bounds
+
+print(xmin_global, ymin_global, xmax_global, ymax_global)
 
 #### 1. We get a list of point that are inside the polygon
 point_list = []
@@ -66,15 +68,18 @@ logger.info("Computing all the points to create tiles done")
 logger.info("Beginning computing all the points to create tiles")
 
 step = 5
-height_tot = int((ymax - ymin) / step)
-width_tot = int((xmax - xmin) / step)
+height_tot = int((ymax_global - ymin_global) / step)
+width_tot = int((xmax_global - xmin_global) / step)
 
 info_to_extract = "igntop202103_bat_hauteur"
 file_name = '/home/data/france_buildingh.tif'
 
-profile = {'driver': 'GTiff', 'height': height_tot, 'width': width_tot, 'count': 1, 'dtype': rasterio.float32, 'crs': 'EPSG:2154', 'transform': rasterio.Affine(step, 0.0, xmin, 0.0, -step, ymax)}
+profile = {'driver': 'GTiff', 'height': height_tot, 'width': width_tot, 'count': 1, 'dtype': rasterio.int8, 'crs': 'EPSG:2154'}
 
 distance = 500
+
+# we create a Affine transform that map xmin to 0 and ymin to 0 and ymax to height_tot and xmax to width_tot
+transform = rasterio.transform.from_bounds(xmin, ymin, xmax, ymax, width_tot, height_tot) 
 
 with rasterio.open(file_name, 'w', **profile) as dst:
 
@@ -83,28 +88,25 @@ with rasterio.open(file_name, 'w', **profile) as dst:
     for index, row in enumerate(point_list):
 
         print(row)
-        print(info_to_extract)
 
         # get the value of the raster at the point
-        value = get_raster_value(row.x, row.y, distance, feature=info_to_extract)
+        value = get_raster_value(row.x, row.y, distance, feature_name=info_to_extract)
 
         value  = value.values[0, 1:201, 0:200]
 
-        print(value)
+        print(row.x)
+        print(xmin_global)
 
-        # the beginning is at row['geometry'].x - 500 and row['geometry'].y - 500
-        # the end is at row['geometry'].x + 500 and row['geometry'].y + 500
-        # get the window
-        src_transform = dst.transform
-        
-        window = Window.from_slices((int((row.y - 500)/step), int((row.y + 500)/step)), (int((row.x - 500)/step), int((row.x + 500)/step)))
-        print(window)
-        win_transform = dst.window_transform(window)
+        slice_y = (int((row.y - distance - ymin_global)/step), int((row.y + distance - ymin_global)/step))
+        slice_x = (int((row.x - distance - xmin_global)/step), int((row.x + distance - xmin_global)/step))
 
-        print(win_transform)
+        print(slice_y, slice_x)
+
+        # we transform the two slice
+        window = Window.from_slices(slice_y, slice_x)
 
         # write the value in the raster file
-        dst.write(value, window=win_transform, indexes=1)
+        dst.write(value, window=window, indexes=1)
 
         break
 
