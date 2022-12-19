@@ -5,12 +5,15 @@ import geopandas as gpd
 from shapely.geometry import Point, Polygon, MultiPolygon
 
 from bnbserver.extracts_functions import get_raster_value
-from bnbserver.server import app, create_app
+from bnbserver.server import create_app
 
 import flask
 
 @pytest.fixture()
 def app():
+    """
+    Launch the server
+    """
     app = create_app()
     app.config.update({
         "TESTING": True,
@@ -23,6 +26,9 @@ def app():
 
 @pytest.fixture()
 def client(app):
+    """
+    Just to test the server
+    """
     return app.test_client()
 
 @pytest.fixture()

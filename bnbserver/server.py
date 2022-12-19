@@ -9,14 +9,14 @@ X, Y are the coordinates of the center of the bbox we want to extract
 distance is the distance from the center of the bbox to the edge of the bbox
 feature is the feature we want to extract
 """
-
+import os
 import flask
 from flask import request, send_from_directory
 
 from bnbserver import extracts_functions
 
 import numpy as np
-import os
+
 
 # init the flask app
 app = flask.Flask(__name__)
@@ -25,6 +25,10 @@ app = flask.Flask(__name__)
 # we create a route that will listen for incoming connections 
 @app.route('/api/v1/resources/extracts', methods=['GET'])
 def api_extract():
+    """
+    This function will extract the data from the geopackage file
+    Basically it will create a bbox from the parameters and then extract the data from the geopackage file
+    """
     # retrieve the parameters from the request
     X = request.args.get('X')
     Y = request.args.get('Y')
@@ -34,7 +38,7 @@ def api_extract():
     # we check if the parameters are not None
     if X is None or Y is None or distance is None or feature is None:
         return "Error: Missing parameters"
-    
+ 
     # convert the parameters to float
     X = float(X)
     Y = float(Y)
@@ -46,9 +50,12 @@ def api_extract():
     # return the array as a json
     return flask.jsonify(raster_value.values.tolist())
 
-# create another route that will allow us to download the data from raster data (faster than the api)
+# download the data from raster data (faster than the api)
 @app.route('/api/v1/resources/download', methods=['GET'])
 def api_download():
+    """
+    Direct download of the data from the raster data
+    """
     # retrieve the parameters from the request
     X = request.args.get('X')
     Y = request.args.get('Y')
@@ -78,7 +85,6 @@ def api_download():
 
 def create_app():
     return app
-
 
 # launch the server
 if __name__ == "__main__":

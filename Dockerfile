@@ -11,6 +11,7 @@ WORKDIR /home
 #COPY . .
 #RUN pip3 install .
 
+
 RUN pip3 install --upgrade pip
 
 # install geocube
@@ -33,6 +34,10 @@ RUN pip3 install geoplot
 
 # install flask
 RUN pip3 install flask
+
+# create directories
+RUN mkdir /home/data/
+RUN mkdir /home/src/
 
 # port mapping between 5000 in the container and 5000 on the host for the flask app
 EXPOSE 5000
