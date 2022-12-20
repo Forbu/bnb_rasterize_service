@@ -13,10 +13,12 @@ from shapely.geometry import Point, Polygon, MultiPolygon
 
 import rasterio
 
-path_gpck = "/home/data/bnb_export.gpkg/bnb_export.gpkg"
+from pyproj import Proj, transform
 
-# function that take as input a position X, Y, distance and the feature we want to retrieve and return the raster value at this position 
-def get_raster_value(X, Y, distance, feature_name="igntop202103_bat_hauteur"):
+path_gpck = "/home/data/bnb_export.gpkg"
+
+# function that take as position X, Y, distance and feature and return the raster at this position
+def get_raster_value(X, Y, distance, feature_name="igntop202103_bat_hauteur", epsg=2154):
     """
     parameters:
         X, Y: position of the point
@@ -26,6 +28,19 @@ def get_raster_value(X, Y, distance, feature_name="igntop202103_bat_hauteur"):
     return:
         raster_value: raster value at the position X, Y (array)
     """
+
+    # if epsg == 2154:
+    # we don't do any change to X and Y
+
+    if epsg == 2154:
+        # we don't do any change to X and Y
+        pass
+    elif epsg == 27572:
+        # we convert the X, Y to EPSG:2154
+        inProj = Proj(init='epsg:27572')
+        outProj = Proj(init='epsg:2154')
+        X, Y = transform(inProj,outProj,X,Y)
+
 
     # first we create the bbox supposing X, Y is the center of the bbox
     bbox = (X - distance, Y - distance, X + distance, Y + distance)
@@ -45,7 +60,7 @@ def get_raster_value(X, Y, distance, feature_name="igntop202103_bat_hauteur"):
 
         feature_value = element["properties"][feature_name]
 
-        if feature_value == None:
+        if feature_value is None:
             feature_value = -1
 
         # create the multipolygon and append it to the geometries list

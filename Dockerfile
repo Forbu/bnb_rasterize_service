@@ -11,7 +11,6 @@ WORKDIR /home
 #COPY . .
 #RUN pip3 install .
 
-
 RUN pip3 install --upgrade pip
 
 # install geocube

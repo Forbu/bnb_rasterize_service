@@ -17,7 +17,5 @@ setup(
     entry_points={
         'console_scripts': [
             'bnbserver = bnbserver.server:main'
-        ]
-)
-
-    
+        ]}
+)    

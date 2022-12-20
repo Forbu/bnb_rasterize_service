@@ -18,12 +18,11 @@ import geopandas as gpd
 
 from shapely.geometry import Point, Polygon, MultiPolygon
 
-
 start_time = time.time()
 
 X, Y = 648731.0, 6858949.0
 
-file_path_gpkg = "/home/data/bnb_export.gpkg/bnb_export.gpkg" 
+file_path_gpkg = "/home/data/bnb_export.gpkg"
 
 # start timer 
 start_time = time.time()
@@ -43,18 +42,24 @@ heights = []
 # we go through the generator and change the geometry type to polygon
 for element in vector_data: 
 
-    height = element["properties"]['igntop202103_bat_hauteur'] 
+    print(element["properties"].keys())
 
-    if height == None:
-        height = -1
+    try:
 
-    vector_data_shape.append((element["geometry"], float(height)))
+        height = element["properties"]['igntop202103_bat_hauteur'] 
 
-    # create the multipolygon and append it to the geometries list
-    geometries.append(MultiPolygon([Polygon(element["geometry"]["coordinates"][0][0])]))
-    
-    # append the height to the heights list
-    heights.append(float(height))
+        if height == None:
+            height = -1
+
+        vector_data_shape.append((element["geometry"], float(height)))
+
+        # create the multipolygon and append it to the geometries list
+        geometries.append(MultiPolygon([Polygon(element["geometry"]["coordinates"][0][0])]))
+        
+        # append the height to the heights list
+        heights.append(float(height))
+    except:
+        pass
 
 # now we use put the shapes in a geopandas dataframe
 gdf = gpd.GeoDataFrame(heights, geometry=geometries, columns=['height'])
