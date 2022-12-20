@@ -34,7 +34,6 @@ with fiona.open(file_path_gpkg) as fiona_collection:
 
     print(fiona_collection.crs)
 
-
 vector_data_shape = []
 geometries = []
 heights = []

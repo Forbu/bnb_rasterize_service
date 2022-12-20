@@ -1,5 +1,6 @@
 # ignore data/ files
 data/
+images/
 
 # ignore all .pyc files
 *.pyc

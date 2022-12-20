@@ -13,12 +13,12 @@ from shapely.geometry import Point, Polygon, MultiPolygon
 
 import rasterio
 
-from pyproj import Proj, transform
+from pyproj import Transformer
 
 path_gpck = "/home/data/bnb_export.gpkg"
 
 # function that take as position X, Y, distance and feature and return the raster at this position
-def get_raster_value(X, Y, distance, feature_name="igntop202103_bat_hauteur", epsg=2154):
+def get_raster_value(X, Y, distance, feature_name="igntop202103_bat_hauteur", epsg=2154, resolution=5):
     """
     parameters:
         X, Y: position of the point
@@ -37,9 +37,10 @@ def get_raster_value(X, Y, distance, feature_name="igntop202103_bat_hauteur", ep
         pass
     elif epsg == 27572:
         # we convert the X, Y to EPSG:2154
-        inProj = Proj(init='epsg:27572')
-        outProj = Proj(init='epsg:2154')
-        X, Y = transform(inProj,outProj,X,Y)
+        transformer = Transformer.from_crs("epsg:27572", "epsg:2154")
+
+        X, Y = transformer.transform(X, Y)
+
 
 
     # first we create the bbox supposing X, Y is the center of the bbox
@@ -56,7 +57,7 @@ def get_raster_value(X, Y, distance, feature_name="igntop202103_bat_hauteur", ep
     feature = []
 
     # we go through the generator and change the geometry type to polygon
-    for element in vector_data: 
+    for element in vector_data:
 
         feature_value = element["properties"][feature_name]
 
@@ -90,7 +91,7 @@ def get_raster_value(X, Y, distance, feature_name="igntop202103_bat_hauteur", ep
     cube = make_geocube(
         vector_data=gdf,
         measurements=[feature_name],
-        resolution=(5, 5),
+        resolution=(resolution, resolution),
         geom=geom,
         fill=0,
     )
